@@ -1,0 +1,8 @@
+# Local database files - each developer generates their own
+backend/database/*.db
+backend/database/*.db-journal
+backend/database/*.db-wal
+backend/database/*.db-shm
+__pycache__/
+*.pyc
+.venv

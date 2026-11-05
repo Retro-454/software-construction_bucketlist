@@ -1,0 +1,3 @@
+# SQLite ships with Python (sqlite3 module), so the database needs no pip install.
+# Add backend packages below as the project grows, e.g.:
+# pytest
