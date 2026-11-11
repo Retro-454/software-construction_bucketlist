@@ -38,7 +38,15 @@ def create_app(db=None):
         "tasks": tasks,
     }
 
-    app = Flask(__name__)
+    app = Flask(
+        __name__,
+        static_folder="../frontend",
+        static_url_path=""
+    )
+
+    @app.get("/")
+    def home():
+        return app.send_static_file("index.html")
 
     # --helpers--
 
