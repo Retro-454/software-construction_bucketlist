@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>BucketList · Task Dashboard</title>
+
+  <link rel="stylesheet" href="style.css" />
+  <script src="script.js" defer></script>
+</head>
+
+<body>
+
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <div class="brand">
+        <span class="brand-icon">✓</span>
+        <span>BucketList</span>
+      </div>
+
+      <p class="muted small">Local development dashboard</p>
+
+      <label for="actorId">
+        Demo actor (existing user ID)
+      </label>
+
+      <input
+        type="number"
+        min="1"
+        id="actorId"
+        placeholder="e.g. 1"
+      />
+
+      <p class="hint">
+        Development only: your API trusts the X-Actor-Id header.
+        Replace this with login/session authentication before deployment.
+      </p>
+
+      <div class="divider"></div>
+
+      <!-- CREATE BUCKET -->
+      <form id="bucketForm">
+
+        <h3>Create bucket</h3>
+
+        <label for="bucketName">Bucket name</label>
+
+        <input
+          id="bucketName"
+          type="text"
+          required
+          placeholder="Software project"
+        />
+
+        <button type="submit">
+          Create bucket
+        </button>
+
+      </form>
+
+      <!-- CREATE CATEGORY -->
+      <form id="categoryForm">
+
+        <h3>Create category</h3>
+
+        <label for="bucketId">Bucket ID</label>
+
+        <input
+          id="bucketId"
+          type="number"
+          min="1"
+          required
+          placeholder="e.g. 1"
+        />
+
+        <label for="categoryName">Category name</label>
+
+        <input
+          id="categoryName"
+          type="text"
+          required
+          placeholder="Backend development"
+        />
+
+        <button type="submit" class="secondary">
+          Create category
+        </button>
+
+      </form>
+
+    </aside>
+
+    <!-- MAIN DASHBOARD -->
+    <main>
+
+      <header class="page-header">
+
+        <div>
+          <div class="eyebrow">WORKSPACE / TASKS</div>
+
+          <h1>Task dashboard</h1>
+
+          <p class="muted">
+            Organize your tasks and keep projects moving.
+          </p>
+        </div>
+
+      </header>
+
+      <!-- STATUS MESSAGE -->
+      <div
+        id="status"
+        class="status"
+        role="status"
+        aria-live="polite"
+      >
+        Enter an existing user ID to get started.
+      </div>
+
+      <!-- DISPLAY CATEGORY TASKS -->
+      <section class="panel">
+
+        <div class="row between wrap">
+
+          <div>
+            <h2>Category tasks</h2>
+
+            <p class="muted">
+              Load tasks by category ID.
+            </p>
+          </div>
+
+          <div class="row wrap">
+
+            <label class="compact" for="categoryId">
+              Category ID
+            </label>
+
+            <input
+              type="number"
+              min="1"
+              id="categoryId"
+              placeholder="e.g. 1"
+            />
+
+            <!-- SORT TASKS -->
+            <select id="sortBy" aria-label="Sort tasks">
+
+              <option value="PRIORITY">
+                Priority
+              </option>
+
+              <option value="DUEDATE">
+                Due date
+              </option>
+
+              <option value="COMPLETION_STATUS">
+                Completion
+              </option>
+
+            </select>
+
+            <button id="loadTasks" type="button">
+              Load tasks
+            </button>
+
+          </div>
+
+        </div>
+
+        <!-- CATEGORY PROGRESS -->
+        <div id="progress" class="progress-line"></div>
+
+        <!-- TASK LIST -->
+        <div id="tasks" class="task-list">
+
+          <p class="muted">
+            No category loaded yet.
+          </p>
+
+        </div>
+
+      </section>
+
+      <!-- CREATE TASK -->
+      <section class="panel">
+
+        <h2>Create task</h2>
+
+        <form id="taskForm" class="form-grid">
+
+          <!-- CATEGORY -->
+          <div>
+
+            <label for="taskCategory">
+              Category ID
+            </label>
+
+            <input
+              id="taskCategory"
+              type="number"
+              min="1"
+              required
+            />
+
+          </div>
+
+          <!-- TASK NAME -->
+          <div>
+
+            <label for="taskName">
+              Task name
+            </label>
+
+            <input
+              id="taskName"
+              type="text"
+              required
+              placeholder="Build user interface"
+            />
+
+          </div>
+
+          <!-- DESCRIPTION -->
+          <div class="full">
+
+            <label for="taskDescription">
+              Description
+            </label>
+
+            <textarea
+              id="taskDescription"
+              placeholder="Optional details"
+            ></textarea>
+
+          </div>
+
+          <!-- DUE DATE -->
+          <div>
+
+            <label for="taskDueDate">
+              Due date
+            </label>
+
+            <input
+              id="taskDueDate"
+              type="date"
+            />
+
+          </div>
+
+          <!-- URGENCY -->
+          <div>
+
+            <label for="taskUrgency">
+              Urgency
+            </label>
+
+            <input
+              id="taskUrgency"
+              type="number"
+              placeholder="Optional"
+            />
+
+          </div>
+
+          <!-- SUBMIT -->
+          <div class="full">
+
+            <button type="submit">
+              Create task
+            </button>
+
+          </div>
+
+        </form>
+
+      </section>
+
+    </main>
+
+  </div>
+
+</body>
+</html>
