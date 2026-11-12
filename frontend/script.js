@@ -2,10 +2,7 @@
 // GLOBAL HELPERS
 // ==========================================
 
-// LOCAL DEVELOPMENT ONLY.
-// X-Actor-Id is not secure authentication.
-// Replace it with verified login sessions
-// before deploying your application.
+
 
 const $ = id => document.getElementById(id);
 
