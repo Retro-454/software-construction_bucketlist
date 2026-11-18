@@ -14,7 +14,9 @@ from Bucket import Bucket
 from Category import Category
 from Db import Db
 from Task import Task
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, session, redirect
+from werkzeug.security import check_password_hash
+import os
 
 
 class MissingActorError(Exception):
@@ -44,18 +46,82 @@ def create_app(db=None):
         static_url_path=""
     )
 
+    app.config.update(
+        SECRET_KEY=os.environ["FLASK_SECRET_KEY"],
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE="Lax",
+    )
+
     @app.get("/")
-    def home():
+    def login_page():
+       if "user_id" in session:
+            return redirect("/dashboard")
+
+       return app.send_static_file("login.html")
+    
+    @app.get("/dashboard")
+    def dashboard():
+        if "user_id" not in session:
+            return redirect("/")
+
         return app.send_static_file("index.html")
+
+    @app.post("/api/login")
+    def login():
+
+        data = request.get_json(silent=True)
+
+        if not isinstance(data, dict):
+            return jsonify({"error": "Invalid request"}), 400
+
+        username = data.get("username")
+        password = data.get("password")
+
+        if not isinstance(username, str) or not username.strip():
+            return jsonify({"error": "Username is required"}), 400
+
+        if not isinstance(password, str) or not password:
+            return jsonify({"error": "Password is required"}), 400
+
+        users = db.execute(
+            "SELECT user_id, username, password_hash "
+            "FROM users WHERE username = ?",
+            (username.strip(),)
+        )
+
+        if not users or not check_password_hash(
+            users[0]["password_hash"], password
+        ):
+            return jsonify({
+                "error": "Invalid username or password"}), 401
+
+        user = users[0]
+        session.clear()
+        session["user_id"] = user["user_id"]
+
+        return jsonify({
+            "message": "Login successful",
+            "username": user["username"],
+            "redirect": "/dashboard"
+        })
+        
+
+    @app.post("/api/logout")
+    def logout():
+        session.clear()
+        return jsonify({"message": "Logout successful", "redirect": "/"})
+    
 
     # --helpers--
 
     def actor() -> int:
         # get actor from request headers
-        raw = request.headers.get("X-Actor-Id", "")
-        if not raw.isdigit():
-            raise MissingActorError("Missing or invalid actor id")
-        return int(raw)
+        user_id = session.get("user_id")
+
+        if user_id is None:
+            raise MissingActorError("You must log in first")
+
+        return user_id
 
     def body() -> dict:
         data = request.get_json(silent=True)
@@ -107,6 +173,26 @@ def create_app(db=None):
         return jsonify(
             {"deleted": manager(resource).delete(record_id, actor())}
         )
+
+ # --user workspace / bucket navigation--
+
+    @app.get("/api/users/me")
+    def current_user():
+        user_id = actor()
+        users = db.execute(
+            "SELECT user_id, username FROM users WHERE user_id = ?", (user_id,)
+        )
+        if not users:
+            raise LookupError(f"user {user_id} not found")
+        return jsonify(users[0])
+
+    @app.get("/api/buckets/mine")
+    def my_buckets():
+        return jsonify(buckets.list_for_user(actor()))
+
+    @app.get("/api/buckets/<int:bucket_id>/categories")
+    def bucket_categories(bucket_id):
+        return jsonify(categories.list_for_bucket(bucket_id, actor()))
 
     # --buckets--
 
