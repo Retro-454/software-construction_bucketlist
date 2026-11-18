@@ -533,3 +533,34 @@ function button(label, handler) {
 
     return b;
 }
+document
+    .getElementById("logoutBtn")
+    .addEventListener(
+        "click",
+        async () => {
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/logout",
+                        {
+                            method: "POST",
+                            credentials: "same-origin"
+                        }
+                    );
+
+                const data =
+                    await response.json();
+
+                window.location.href =
+                    data.redirect;
+
+            } catch (err) {
+
+                alert(
+                    "Logout failed"
+                );
+            }
+        }
+    );

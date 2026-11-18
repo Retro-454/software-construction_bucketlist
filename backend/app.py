@@ -15,7 +15,7 @@ from Category import Category
 from Db import Db
 from Task import Task
 from flask import Flask, jsonify, request, session, redirect
-from werkzeug.security import check_password_hash
+from werkzeug.security import (check_password_hash,generate_password_hash)
 import os
 
 
@@ -47,7 +47,10 @@ def create_app(db=None):
     )
 
     app.config.update(
-        SECRET_KEY=os.environ["FLASK_SECRET_KEY"],
+        SECRET_KEY=os.environ.get(
+            "FLASK_SECRET_KEY",
+            "dev-secret-key"
+        ),
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
     )
@@ -105,6 +108,50 @@ def create_app(db=None):
             "redirect": "/dashboard"
         })
         
+
+    @app.post("/api/register")
+    def register():
+
+        data = body()
+
+        username = data.get("username", "").strip()
+        password = data.get("password", "")
+
+        if not username:
+            raise ValueError("Username is required")
+
+        if not password:
+            raise ValueError("Password is required")
+
+        existing = db.execute(
+            "SELECT user_id FROM users WHERE username = ?",
+            (username,)
+        )
+
+        if existing:
+            raise ValueError("Username already exists")
+
+        db.execute(
+            """
+            INSERT INTO users(username, password_hash)
+            VALUES (?, ?)
+            """,
+            (
+                username,
+                generate_password_hash(
+                    password,
+                    method="pbkdf2:sha256"
+                )
+            )
+        )
+        new_user = db.execute(
+            "SELECT user_id FROM users WHERE username = ?",
+            (username,)
+        )
+        return jsonify({
+            "message": "Account created",
+            "user_id": new_user[0]["user_id"]
+        }), 201
 
     @app.post("/api/logout")
     def logout():
